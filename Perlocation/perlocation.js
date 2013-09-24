@@ -37,7 +37,6 @@ Cell.prototype = {
 
         return "x ";
     }
-
 };
 
 function Perlocation (n) {
@@ -91,13 +90,21 @@ Perlocation.prototype = {
 
         cellA.open();
 
-        if ( i === 0 ) this.uf.union( 0, cellA.toId() );
+        if ( i === 0 ) {
+            this.uf.union( 0, cellA.toId() );
+            // cellA.fulfill();
+        }
 
         adjCells.forEach( function (cell) {
             if ( cell.isOpen() ) this.uf.union( cellA.toId(), cell.toId() );
         }, this );
 
         if ( i === this.n - 1 ) this.uf.union( this.n * this.n + 1, cellA.toId() );
+
+        // if ( this.uf.connected( 0, cellA.toId() ) ) {
+        //     cellA.fulfill();
+        // }
+
     }
 
   , isOpen: function (i, j) {
@@ -136,8 +143,6 @@ printMap( p );
 p.open( 0, 0 )
 console.log( ">>", "open: (0,0)#1" );
 printMap( p );
-
-// console.log( p.getAdjancetCells(0,0) );
 
 p.open( 1, 1 )
 console.log( ">>", "open: (1,1)#5" );
