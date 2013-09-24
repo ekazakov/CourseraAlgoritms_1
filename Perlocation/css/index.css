@@ -1,0 +1,44 @@
+html, body {
+    min-height: 100%;
+}
+
+#model {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: 500px;
+    height: 500px;
+    /*box-shadow: 0 0 4px #999;*/
+}
+
+.cell {
+    /*border: 1px solid #999;*/
+    position: absolute;
+    box-sizing: border-box;
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 9px;
+    text-align: center;
+}
+
+.cell-blocked {
+    background-color: #000;
+    color: #000;
+}
+
+.cell-empty {
+    background-color: #FFF;
+    color: #fff;
+}
+
+.cell-full {
+    background-color: #0000F0;
+    color: #0000F0;
+}
+
+.cell-blocked:hover, .cell-full:hover {
+    color: #fff;
+}
+
+.cell-empty:hover {
+    color: #000;
+}

@@ -1,120 +1,96 @@
-var _ = require( "underscore" );
-var UnionFind = require( "./unionfind" );
-
-function Cell (id, i, j) {
-    this.i = i;
-    this.j = j;
-    this.id = id;
-    this._isOpen = false;
-    this._isFull = false;
-}
-
-Cell.prototype = {
-
-    isOpen: function () {
-        return this._isOpen;
-    }
-
-  , isFull: function () {
-        return this._isFull;
-    }
-
-  , open: function () {
-        this._isOpen = true;
-    }
-
-  , fulfill: function () {
-        this._isFull = true;
-    }
-
-  , toId: function () {
-        return this.id;
-    }
-
-  , toS: function () {
-        if ( this._isFull ) return "F ";
-        if ( this._isOpen ) return "O ";
-
-        return "x ";
-    }
-};
 
 function Perlocation (n) {
     this.n = n;
+    this.sink = this.n * this.n + 1
     this.cells = [];
     this.uf = new UnionFind( n * n + 2 );
 
     for ( var i = 0; i < n; i++ ) {
-        this.cells[i] = [];
-
         for ( var j = 0; j < n; j++ ) {
             var id = i * n + j + 1;
-            this.cells[i][j] = new Cell( id, i, j );
+            var cell = new Cell( id, new Point( i, j ) );
+            this.cells.push( cell );
         };
     };
 }
 
 Perlocation.prototype = {
 
-    // checkIndexRange: function (index, name) {
-    //     var msg = name + " is out of range. " + name + " = " + index +
-    //               "; must be between 1 and " + this.n;
-    //     if ( index < 0 || index > this.n ) throw Error( msg );
-    // }
+    cellFromPoint: function (point) {
+        return this.cells[ point.i * this.n + point.j ];
+    }
 
-    getAdjancetCells: function (i, j) {
+  , getAdjancetCells: function (cell) {
         var adjancetCells = [];
+        var p = cell.getPoint();
+        var point;
 
-        if ( i < this.n && i - 1 >= 0 && j >= 0 && j < this.n ) {
-            adjancetCells.push( this.cells[i - 1][j] );
+        if ( p.isIinRange( 0, this.n ) && p.isJinRange( -1, this.n ) ) {
+            point = new Point( p.i - 1, p.j );
+            adjancetCells.push( this.cellFromPoint( point ) );
         }
 
-        if ( i >= 0 && i + 1 < this.n && j >= 0 && j < this.n ) {
-            adjancetCells.push( this.cells[i + 1][j] );
+        if ( p.isIinRange( -1, this.n - 1 ) && p.isJinRange( -1, this.n ) ) {
+            point = new Point( p.i + 1, p.j );
+            adjancetCells.push( this.cellFromPoint( point ) );
         }
 
-        if ( i >= 0 && i < this.n && j + 1 < this.n && j >= 0 ) {
-            adjancetCells.push( this.cells[i][j + 1] );
+        if ( p.isIinRange( -1, this.n ) && p.isJinRange( -1, this.n - 1 ) ) {
+            point = new Point( p.i, p.j + 1 );
+            adjancetCells.push( this.cellFromPoint( point ) );
         }
 
-        if ( i >= 0 && i < this.n && j - 1 >= 0 && j < this.n ) {
-            adjancetCells.push( this.cells[i][j - 1] );
+        if ( p.isIinRange( -1, this.n - 1 ) && p.isJinRange( 0, this.n ) ) {
+            point = new Point( p.i, p.j - 1 );
+            adjancetCells.push( this.cellFromPoint( point ) );
         }
 
         return adjancetCells;
     }
 
-  , open: function (i, j) {
-        var cellA = this.cells[i][j];
-        var adjCells = this.getAdjancetCells( i, j );
+  , fulfillAdjacent: function (cell) {
+        this.getAdjancetCells( cell ).forEach( function (cell) {
 
-        cellA.open();
-
-        if ( i === 0 ) {
-            this.uf.union( 0, cellA.toId() );
-            // cellA.fulfill();
-        }
-
-        adjCells.forEach( function (cell) {
-            if ( cell.isOpen() ) this.uf.union( cellA.toId(), cell.toId() );
+            if ( cell.isEmpty() ) {
+                cell.fulfill();
+                this.fulfillAdjacent( cell );
+            }
         }, this );
-
-        if ( i === this.n - 1 ) this.uf.union( this.n * this.n + 1, cellA.toId() );
-
-        // if ( this.uf.connected( 0, cellA.toId() ) ) {
-        //     cellA.fulfill();
-        // }
-
     }
 
-  , isOpen: function (i, j) {
-        this.checkIndexRange( i, "I" );
-        this.checkIndexRange( j, "J" );
-        return this.cells[i][j].isOpen();
+  , pointFromId: function (id) {
+        var i = ~~( ( id ) / this.n );
+        var j = ( id ) % this.n;
+
+        return new Point( i, j );
+    }
+
+  , open: function ( id ) {
+        var point = this.pointFromId( id );
+
+        var cell = this.cellFromPoint( point );
+        var adjCells = this.getAdjancetCells( cell );
+
+        cell.open();
+
+        if ( point.i === 0 ) {
+            this.uf.union( 0, cell.getId() );
+            cell.fulfill();
+        }
+
+        adjCells.forEach( function (adjCell) {
+            if ( adjCell.isOpen() ) this.uf.union( cell.getId(), adjCell.getId() );
+
+            if ( !cell.isFull() && adjCell.isFull() ) cell.fulfill();
+        }, this );
+
+        if ( point.i === this.n - 1 ) this.uf.union( this.sink, cell.getId() );
+
+        if ( cell.isFull() ) { this.fulfillAdjacent( cell ); }
     }
 
   , perlocates: function () {
-        return this.uf.connected( 0, this.n * this.n + 1 );
+        return this.uf.connected( 0, this.sink );
     }
 
   , size: function () {
@@ -122,38 +98,48 @@ Perlocation.prototype = {
     }
 
   , toS: function () {
-        return _.chain( this.cells ).reduce( function (memo, row, i, cells) {
-            return memo += _.chain( row ).reduce( function (memo, cell) {
-                return memo += cell.toS();
-            }, "" ).value() + "\n";
-        }, "" ).value();
+        var map = "";
+        var n = this.n;
+
+        function isLastInRow (index) {
+            if ( index !== 0 && ( index + 1 ) % n === 0 ) return true;
+            return false;
+        }
+
+        _( this.cells ).each( function( cell, index ) {
+            map += cell.toS();
+
+            if ( isLastInRow( index ) ) map += "\n";
+        }, this );
+
+        return map;
     }
 
 };
 
-var p = new Perlocation( 3 );
-console.log( ">> is perlocates", p.perlocates() );
-printMap( p );
+// var p = new Perlocation( 4 );
+// console.log( ">> is perlocates", p.perlocates() );
+// printMap( p );
 
-p.open( 1, 0 )
-console.log( ">>", "open: (1,0)#4" );
-console.log( ">> is perlocates", p.perlocates() );
-printMap( p );
+// p.open( 1, 0 )
+// console.log( ">>", "open: (1,0)#4" );
+// console.log( ">> is perlocates", p.perlocates() );
+// printMap( p );
 
-p.open( 0, 0 )
-console.log( ">>", "open: (0,0)#1" );
-printMap( p );
+// p.open( 0, 0 )
+// console.log( ">>", "open: (0,0)#1" );
+// printMap( p );
 
-p.open( 1, 1 )
-console.log( ">>", "open: (1,1)#5" );
-console.log( ">> is perlocates", p.perlocates() );
-printMap( p );
+// p.open( 1, 1 )
+// console.log( ">>", "open: (1,1)#5" );
+// console.log( ">> is perlocates", p.perlocates() );
+// printMap( p );
 
-p.open( 2, 1 )
-console.log( ">>", "open: (2,1)#8" );
-// console.log( ">> is (1,0)#1 & (3,1)#8 connected?", p.uf.connected( 1, 8 ) );
-console.log( ">> is perlocates", p.perlocates() );
-printMap( p );
+// p.open( 2, 1 )
+// console.log( ">>", "open: (2,1)#8" );
+// // console.log( ">> is (1,0)#1 & (3,1)#8 connected?", p.uf.connected( 1, 8 ) );
+// console.log( ">> is perlocates", p.perlocates() );
+// printMap( p );
 
 
 
@@ -185,7 +171,7 @@ printMap( p );
 
 // console.log( "\n\n" + p.toS() );
 
-function printMap (p) {
-    console.log( p.toS() );
-    console.log( p.uf.toS(), "\n\n" );
-}
+// function printMap (p) {
+//     console.log( p.toS() );
+//     console.log( p.uf.toS(), "\n\n" );
+// }

@@ -1,4 +1,3 @@
-var _ = require( "underscore" );
 
 function UnionFind (n) {
     this._id = [];
@@ -52,4 +51,3 @@ UnionFind.prototype = {
 
 };
 
-module.exports = UnionFind;
