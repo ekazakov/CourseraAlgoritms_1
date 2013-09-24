@@ -87,3 +87,12 @@ console.log( "Join 6 and 0 and 7 & 6" );
 qf.union( 6, 0 );
 qf.union( 7, 6 );
 console.log( qf.toString() );
+
+// qf.union( 4, 7 );
+// qf.union( 9, 5 );
+// qf.union( 8, 9 );
+// qf.union( 4, 2 );
+// qf.union( 0, 7 );
+// qf.union( 8, 6 );
+
+// console.log(">>", qf._id.join(" ") );
