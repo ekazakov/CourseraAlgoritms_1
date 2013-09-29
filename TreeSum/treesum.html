@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    </head>
+    <body>
+        <script src="bower_components/underscore/underscore.js"></script>
+        <script>
+
+            var steps = [ 1.0e+3, 2.0e+3, 4.0e+3, 8.0e+3];
+            // var steps = [100];
+            var randoms = {};
+
+            steps.forEach( function (count) {
+                console.time("Generate " + count + " randoms");
+
+                randoms[count] = _( count ).times( function(n) {
+                    return _.random( -1.0e+4, 1.0e+4 );
+                });
+                console.timeEnd( "Generate " + count + " randoms" );
+            })
+
+
+            var treeSums = _( randoms ).map( function( data, key ) {
+                var sum = -1;
+                console.time( "TreeSum for " + key );
+                sum = TreeSum( data );
+                console.timeEnd( "TreeSum for " + key );
+
+                return sum;
+            });
+
+
+            function TreeSum (data) {
+                var n   = data.length;
+                var cnt = 0;
+
+                for ( var i = 0; i < n; i++ ) {
+                    for ( var j = i + 1; j < n; j++ ) {
+                        for ( var k = j + 1; k < n; k++ ) {
+                            if ( data[i] + data[j] + data[k] === 0 ){
+                                cnt++;
+                            }
+                        }
+                    }
+                };
+
+                return cnt;
+            }
+
+        </script>
+    </body>
+</html>
