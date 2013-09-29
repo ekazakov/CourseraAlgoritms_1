@@ -23,11 +23,13 @@ Cell.prototype = {
   , open: function () {
         this._isOpen = true;
         this._isEmpty = true;
+        this.trigger( "change", this );
     }
 
   , fulfill: function () {
         this._isFull = true;
         this._isEmpty = false;
+        this.trigger( "change", this );
     }
 
   , getPoint: function () {
@@ -45,3 +47,5 @@ Cell.prototype = {
         return "x ";
     }
 };
+
+_( Cell.prototype ).extend( Observable );

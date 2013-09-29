@@ -1,22 +1,31 @@
 
-function Perlocation (n) {
-    this.n = n;
-    this.sink = this.n * this.n + 1
-    this.cells = [];
-    this.uf = new UnionFind( n * n + 2 );
-
-    for ( var i = 0; i < n; i++ ) {
-        for ( var j = 0; j < n; j++ ) {
-            var id = i * n + j + 1;
-            var cell = new Cell( id, new Point( i, j ) );
-            this.cells.push( cell );
-        };
-    };
-}
+function Perlocation () {}
 
 Perlocation.prototype = {
 
-    cellFromPoint: function (point) {
+    init: function (n) {
+        this.n = n;
+        this.sink = this.n * this.n + 1
+        this.cells = [];
+        this.uf = new UnionFind( n * n + 2 );
+
+        for ( var i = 0; i < n; i++ ) {
+            for ( var j = 0; j < n; j++ ) {
+                var id = i * n + j + 1;
+                var cell = new Cell( id, new Point( i, j ) );
+
+                cell.on( "change", function (cell) {
+                    this.trigger( "cell:change", this, cell );
+                }, this );
+
+                this.cells.push( cell );
+            };
+        };
+
+        return this;
+    }
+
+  , cellFromPoint: function (point) {
         return this.cells[ point.i * this.n + point.j ];
     }
 
@@ -117,61 +126,4 @@ Perlocation.prototype = {
 
 };
 
-// var p = new Perlocation( 4 );
-// console.log( ">> is perlocates", p.perlocates() );
-// printMap( p );
-
-// p.open( 1, 0 )
-// console.log( ">>", "open: (1,0)#4" );
-// console.log( ">> is perlocates", p.perlocates() );
-// printMap( p );
-
-// p.open( 0, 0 )
-// console.log( ">>", "open: (0,0)#1" );
-// printMap( p );
-
-// p.open( 1, 1 )
-// console.log( ">>", "open: (1,1)#5" );
-// console.log( ">> is perlocates", p.perlocates() );
-// printMap( p );
-
-// p.open( 2, 1 )
-// console.log( ">>", "open: (2,1)#8" );
-// // console.log( ">> is (1,0)#1 & (3,1)#8 connected?", p.uf.connected( 1, 8 ) );
-// console.log( ">> is perlocates", p.perlocates() );
-// printMap( p );
-
-
-
-
-// function rand (size) {
-//     return Math.floor( Math.random() * size );
-// }
-
-// function MonteCarlo (perlocation) {
-//     var times = 30;
-//     var n = perlocation.size();
-
-//     for ( var k = 0; k < times; k++ ) {
-//         var i = rand( n );
-//         var j = rand( n );
-
-//         while( perlocation.isOpen( i, j ) ) {
-//             // console.log('i:', i, " j:", j );
-//             i = rand( n );
-//             j = rand( n );
-//         }
-
-//         perlocation.open( i, j );
-//     };
-
-// }
-
-// MonteCarlo( p );
-
-// console.log( "\n\n" + p.toS() );
-
-// function printMap (p) {
-//     console.log( p.toS() );
-//     console.log( p.uf.toS(), "\n\n" );
-// }
+_( Perlocation.prototype ).extend( Observable );
