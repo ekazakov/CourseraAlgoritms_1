@@ -1,6 +1,12 @@
 
 #main {
-    padding: 20px;
+    padding: 50px;
+}
+
+#btn-next {
+    position: absolute;
+    left: 300px;
+    top: 140px;
 }
 
 .row {
@@ -11,7 +17,7 @@
 }
 
 .item {
-    transition: all 0.333s linear;
+    /*transition: all 0.333s linear;*/
     position: absolute;
     padding-top: 2px;
     width: 18px;
@@ -26,7 +32,28 @@
     bottom: 0;
 }
 
-.translate {
-    z-index: 100;
-    box-shadow: 0 2px 3px rgba( 0, 0, 0, 0.5 );
+
+.cursor {
+    background-color: #F02D12;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    bottom: -20px;
+    left: 19px;
 }
+
+.foo {
+    height: 30px;
+    width: 30px;
+    background-color: #eee;
+    position: absolute;
+    left: 50px;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+#foo1 { top: 170px; }
+#foo2 { top: 205px; }
+#foo3 { top: 240px; }
+#foo4 { top: 275px; }
+#foo5 { top: 310px; }
