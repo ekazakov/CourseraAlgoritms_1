@@ -1,14 +1,15 @@
-var data = [ 4, 5, 0, 9, 1, 3, 8, 10, 2, 6, 7 ];
+var animLoop = new AnimationLoop();
+var data = [ 4, 5, 0, 9, 2, 7, 1, 3, 8, 3, 10, 2, 6, 7, 11 ];
 var sort;
 
 function tick () {
-        if ( sort.isOver() ) {
-            return;
-        }
+        if ( sort.isOver() ) return;
 
-        sort.step().then( function () {
-            tick();
-        });
+        try {
+            sort.step()
+                .then( function () { tick(); },
+                       function (reason) { console.log( reason ) });
+        } catch( e ) { console.log( e.stack )}
 }
 
 function initItems (data) {
@@ -46,44 +47,53 @@ function createItem (value, index) {
     return item;
 }
 
-var oldI;
-
-function swapItems (aIndex, bIndex, i) {
-    var aItem = document.querySelector( "[data-num = '" + aIndex + "']" );
-    var bItem = document.querySelector( "[data-num = '" + bIndex + "']" );
+function swapItems (curJIndex, prveJIndex, index) {
     var cursor = document.getElementById( "cursor" );
+    var aItem = document.querySelector( "[data-num = '" + curJIndex + "']" );
+    var bItem = document.querySelector( "[data-num = '" + prveJIndex + "']" );
+
     var aOldOffset = aItem.offsetLeft;
     var bOldOffset = bItem.offsetLeft;
 
-    bItem.dataset.num = aIndex;
-    aItem.dataset.num = bIndex;
+    bItem.dataset.num = curJIndex;
+    aItem.dataset.num = prveJIndex;
 
-    console.log( "swap i:", i, "j:", aIndex );
+    console.log( "swap i:", index, "j:", curJIndex );
 
-    var aAnimation = new Animation ({
-        time: 0.333
-      , callback: function (rate) {
-            aItem.style.left = aOldOffset + rate*(bOldOffset - aOldOffset) + "px"
-        }}, animLoop );
-
-    var bAnimation = new Animation ({
-        time: 0.333
-      , callback: function (rate) {
-            bItem.style.left = bOldOffset + rate*(aOldOffset - bOldOffset) + "px";
-        }}, animLoop )
-
-    var cAnimation = new Animation({
-        time: 0.333
-      , callback: function (rate) {
-            cursor.style.left = aOldOffset + rate*(bOldOffset - aOldOffset) + "px"
-        }
+    var aAnimation = new PropAnimation({
+        time  : 0.333
+      , node  : aItem
+      , prop  : "left"
+      , start : aOldOffset
+      , end   : bOldOffset
     }, animLoop );
 
-    if ( i === aIndex ) {
+    var bAnimation = new PropAnimation ({
+        time  : 0.333
+      , node  : bItem
+      , prop  : "left"
+      , start : bOldOffset
+      , end   : aOldOffset
+    }, animLoop )
+
+    var cAnimation = new PropAnimation({
+        time  : 0.333
+      , node  : cursor
+      , prop  : "left"
+      , start : aOldOffset
+      , end   : bOldOffset
+    }, animLoop );
+
+    if ( index === curJIndex ) {
         var cursorOffsetLeft = cursor.offsetLeft;
-        var dAnimation = new Animation({ time: 1, callback: function (rate) {
-            cursor.style.left = cursorOffsetLeft + rate * ( 19 * ( i ) - cursorOffsetLeft ) + "px";
-        }}, animLoop );
+
+        dAnimation = new PropAnimation({
+            time  : 1
+          , node  : cursor
+          , prop  : "left"
+          , start : cursorOffsetLeft
+          , end   : 19 * index
+        }, animLoop );
 
         return dAnimation.start().then( function () {
             return when.all([ aAnimation.start(), cAnimation.start(), bAnimation.start() ]);
@@ -91,7 +101,6 @@ function swapItems (aIndex, bIndex, i) {
     } else {
         return when.all([ aAnimation.start(), cAnimation.start(), bAnimation.start() ]);
     }
-
 }
 
 function InsertionSort (data) {
@@ -146,132 +155,6 @@ InsertionSort.prototype = {
         this._i = 0;
         this._j = 0;
     }
-}
-
-function Animation(options, animLoop) {
-    this._time = options.time;
-    this._callback = options.callback;
-    this._animLoop = animLoop;
-    this._duration = this._time * 1000;
-    this._defer = when.defer();
-    this._isStarted = false;
-    this._isFinished = false;
-}
-
-Animation.prototype = {
-
-    start: function () {
-        this._endTime = +new Date() + this._duration;
-        this._isStarted = true;
-        this._animLoop.add( this );
-        return this._defer.promise;
-    }
-
-  , tick: function (rate) {
-        var remainingTime = this.getEndTime() - Date.now();
-
-        if ( remainingTime <= 0 ) {
-            this._callback( 1 );
-            this.finish();
-        } else {
-            var rate = 1 - remainingTime / this.getDuration();
-            this._callback( rate );
-        }
-    }
-
-  , cancel: function (reason) {
-        this._isFinished = true;
-        this._defer.reject( reason );
-    }
-
-  , finish: function (args) {
-        this._isFinished = true;
-        this._defer.resolve( args );
-    }
-
-  , isStarted: function () {
-        return this._isStarted;
-    }
-
-  , getEndTime: function () {
-        return this._endTime;
-    }
-
-  , isFinished: function () {
-        return this._isFinished;
-    }
-
-  , getDuration: function () {
-        return this._duration;
-    }
-}
-
-function AnimationLoop () {
-    this._animations = [];
-    this._isRunning = false;
-    this.tick = this.tick.bind( this );
-}
-
-AnimationLoop.prototype = {
-
-    add: function (animation) {
-        this._animations.push( animation );
-
-        if ( !this.isRunning() ) {
-            this._isRunning = true;
-            this.tick();
-        }
-    }
-
-  , isRunning: function () {
-        return this._isRunning;
-    }
-
-  , tick: function () {
-        if ( this._animations.length === 0 ) {
-            this._isRunning = false;
-            return;
-        }
-
-        this._animations.forEach( function (animation, index, animations) {
-            animation.tick();
-            if ( animation.isFinished() ) {
-                animations.splice( index, 1);
-            }
-        });
-
-        requestAnimationFrame( this.tick );
-    }
-}
-
-var animLoop = new AnimationLoop();
-
-function foo () {
-
-    var item1 = document.querySelector( "#foo1" );
-    var item2 = document.querySelector( "#foo2" );
-    var item3 = document.querySelector( "#foo3" );
-
-    var animation1 = new Animation({ time: 1.5, callback: function(rate){
-        item1.style.left = 50 + rate * ( 300 - 50 ) + "px";
-    }}, animLoop );
-
-    var animation2 = new Animation({ time: 4, callback: function(rate){
-        item2.style.left = 50 + rate * ( 550 - 50 ) + "px";
-        if ( item2.offsetLeft > 400 ) {
-            animation2.cancel();
-        }
-    }}, animLoop );
-
-    var animation3 = new Animation({ time: 0.5, callback: function(rate){
-        item3.style.left = 50 + rate * ( 100 - 50 ) + "px";
-    }}, animLoop );
-
-    var p = when.all([ animation1.start(), animation3.start() ])
-
-    p.then( function () {
-        animation2.start();
-    })
 }
 
 $( function () {
