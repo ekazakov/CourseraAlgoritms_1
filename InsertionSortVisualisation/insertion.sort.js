@@ -55,51 +55,43 @@ function swapItems (aIndex, bIndex, i) {
     var aOldOffset = aItem.offsetLeft;
     var bOldOffset = bItem.offsetLeft;
 
-    console.log( "swap i:", i, "j:", aIndex );
-
-    var aPromise = new Animation ({
-        time: 0.333
-      , callback: function (rate) {
-            var left = aOldOffset + rate*(bOldOffset - aOldOffset) + "px"
-            aItem.style.left = left;
-            cursor.style.left = left;
-        }}, animLoop ).start();
-
-
-    var bPromise = new Animation ({
-        time: 0.333
-      , callback: function (rate) {
-            bItem.style.left = bOldOffset + rate*(aOldOffset - bOldOffset) + "px";
-        }}, animLoop ).start();
-
-    var cursorOffsetLeft = cursor.offsetLeft;
-    var cAnimation = null;
-
-    if ( i !== oldI ) {
-        cAnimation = new Animation({ time: 1, callback: function (rate) {
-            console.log( 'cAnimation.i:', cAnimation.i, "i:", i );
-            cursor.style.left = cursorOffsetLeft + rate * ( 19 * ( i + 1 ) - cursorOffsetLeft ) + "px";
-        }}, animLoop );
-    }
-    oldI = i;
-
-    var promise = when
-                    .all([ aPromise, bPromise ])
-                    .then( function () {
-                            // return when.resolve();
-                            if ( cAnimation !== null ) {
-                                return cAnimation.start().then( function () {
-                                    return when.resolve()
-                                })
-                            } else {
-                                return when.resolve()
-                            }
-                    });
-
     bItem.dataset.num = aIndex;
     aItem.dataset.num = bIndex;
 
-    return promise;
+    console.log( "swap i:", i, "j:", aIndex );
+
+    var aAnimation = new Animation ({
+        time: 0.333
+      , callback: function (rate) {
+            aItem.style.left = aOldOffset + rate*(bOldOffset - aOldOffset) + "px"
+        }}, animLoop );
+
+    var bAnimation = new Animation ({
+        time: 0.333
+      , callback: function (rate) {
+            bItem.style.left = bOldOffset + rate*(aOldOffset - bOldOffset) + "px";
+        }}, animLoop )
+
+    var cAnimation = new Animation({
+        time: 0.333
+      , callback: function (rate) {
+            cursor.style.left = aOldOffset + rate*(bOldOffset - aOldOffset) + "px"
+        }
+    }, animLoop );
+
+    if ( i === aIndex ) {
+        var cursorOffsetLeft = cursor.offsetLeft;
+        var dAnimation = new Animation({ time: 1, callback: function (rate) {
+            cursor.style.left = cursorOffsetLeft + rate * ( 19 * ( i ) - cursorOffsetLeft ) + "px";
+        }}, animLoop );
+
+        return dAnimation.start().then( function () {
+            return when.all([ aAnimation.start(), cAnimation.start(), bAnimation.start() ]);
+        })
+    } else {
+        return when.all([ aAnimation.start(), cAnimation.start(), bAnimation.start() ]);
+    }
+
 }
 
 function InsertionSort (data) {
@@ -169,7 +161,6 @@ function Animation(options, animLoop) {
 Animation.prototype = {
 
     start: function () {
-        // console.log('START')
         this._endTime = +new Date() + this._duration;
         this._isStarted = true;
         this._animLoop.add( this );
@@ -237,7 +228,6 @@ AnimationLoop.prototype = {
     }
 
   , tick: function () {
-        // console.log( "tick" );
         if ( this._animations.length === 0 ) {
             this._isRunning = false;
             return;
@@ -282,7 +272,6 @@ function foo () {
     p.then( function () {
         animation2.start();
     })
-
 }
 
 $( function () {
