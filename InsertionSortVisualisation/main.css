@@ -1,0 +1,32 @@
+
+#main {
+    padding: 20px;
+}
+
+.row {
+    font-size: 0;
+    padding-left: 10px;
+    position: relative;
+    height: 100px;
+}
+
+.item {
+    transition: all 0.333s linear;
+    position: absolute;
+    padding-top: 2px;
+    width: 18px;
+    height: 40px;
+    border-top: 2px solid #999;
+    background-color: #ccc;
+    color: #fff;
+    text-align: center;
+    font-size: 10px;
+    font-family: 'PT sans';
+    z-index: 1;
+    bottom: 0;
+}
+
+.translate {
+    z-index: 100;
+    box-shadow: 0 2px 3px rgba( 0, 0, 0, 0.5 );
+}

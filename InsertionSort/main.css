@@ -1,0 +1,54 @@
+
+#main {
+    padding: 20px;
+}
+
+.row {
+    /*background-color: #f4f4f4;*/
+    font-size: 0;
+    height: 40px;
+    line-height: 80px;
+    padding-left: 10px;
+    /*padding-top: 10px;*/
+}
+
+.item {
+    position: relative;
+    width: 5px;
+    /*height: 2px;*/
+    display: inline-block;
+    font-size: 0;
+    margin-right: 1px;
+}
+
+.item:hover {
+}
+
+.inactive {
+    background-color: #CCC;
+}
+
+.inactive:hover {
+    /*border: 1px solid #aaa;*/
+    background-color: #aaa;
+}
+
+.last {
+    background-color: #C02626;
+}
+
+.last:hover {
+    background-color: #D62F2F;
+}
+
+.first {
+
+}
+
+.compared {
+    background-color: #666;
+}
+
+.compared:hover {
+    background-color: #000;
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <link rel="stylesheet" href="main.css">
+            <script>
+                window.define = function(factory) {
+                    try{ delete window.define; } catch(e){ window.define = void 0; } // IE
+                    window.when = factory();
+                };
+                window.define.amd = {};
+            </script>
+            <script src="bower_components/when/when.js"></script>
+            <script src="bower_components/jquery/jquery.js" type="text/javascript" charset="utf-8" ></script>
+            <script src="bower_components/underscore/underscore.js" type="text/javascript" charset="utf-8" ></script>
+
+            <script src="insertion.sort.js" type="text/javascript" charset="utf-8" ></script>
+    </head>
+    <body>
+        <div id="main">
+            <!-- <div class="row">
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+            </div> -->
+        </div>
+    </body>
+</html>
