@@ -14,11 +14,26 @@ var Observable = {
         if ( !list ) return;
         var args = Array.prototype.slice.call( arguments, 1);
 
-
         list.forEach( function (listener) {
             listener[0].apply( listener[1], args)
         })
     }
+
+  , triggerAsync: function (type) {
+        if ( !this._listeners ) return when.resolve( "" );
+
+        var list = this._listeners[type];
+
+        if ( !list ) return;
+        var args = Array.prototype.slice.call( arguments, 1);
+
+        var promises = list.map( function (listener) {
+            return listener[0].apply( listener[1], args)
+        });
+
+        return when.all( promises );
+    }
+
 
   , off: function (type, listener, context) {
         if ( !this._listeners ) return;

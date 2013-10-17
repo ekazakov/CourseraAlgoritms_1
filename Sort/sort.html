@@ -3,8 +3,11 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="main.css">
     </head>
     <body>
+        <div id="main"></div>
+
         <script>
             window.define = function(factory) {
                 try{ delete window.define; } catch(e){ window.define = void 0; } // IE
@@ -13,7 +16,13 @@
             window.define.amd = {};
         </script>
         <script src="bower_components/when/when.js"></script>
+        <script src="bower_components/jquery/jquery.js"></script>
         <script src="bower_components/underscore/underscore.js"></script>
+
+        <script src="animation.js"></script>
+        <script src="prop.animation.js"></script>
+        <script src="animation.loop.js"></script>
+
         <script src="observable.js"></script>
         <script src="base.sort.js"></script>
         <script src="selection.sort.js"></script>
