@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <script>
+            window.define = function(factory) {
+                try{ delete window.define; } catch(e){ window.define = void 0; } // IE
+                window.when = factory();
+            };
+            window.define.amd = {};
+        </script>
+        <script src="bower_components/when/when.js"></script>
+        <script src="bower_components/underscore/underscore.js"></script>
+        <script src="observable.js"></script>
+        <script src="base.sort.js"></script>
+        <script src="selection.sort.js"></script>
+        <script src="main.js"></script>
+
+    </body>
+</html>
